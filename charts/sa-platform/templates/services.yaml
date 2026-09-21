@@ -1,0 +1,28 @@
+{{- range $key, $svc := .Values.services }}
+{{- if $svc.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sa-platform.serviceName" $svc }}
+  namespace: {{ $.Values.namespace.name | quote }}
+  labels:
+    {{- include "sa-platform.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $svc.name | quote }}
+  {{- with $svc.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ default "ClusterIP" $svc.service.type }}
+  {{- if $svc.service.loadBalancerIP }}
+  loadBalancerIP: {{ $svc.service.loadBalancerIP | quote }}
+  {{- end }}
+  selector:
+    app.kubernetes.io/component: {{ $svc.name | quote }}
+  ports:
+    - name: http
+      port: {{ $svc.port }}
+      targetPort: http
+---
+{{- end }}
+{{- end }}

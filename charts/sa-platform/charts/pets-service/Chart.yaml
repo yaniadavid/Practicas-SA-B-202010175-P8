@@ -1,0 +1,7 @@
+apiVersion: v2
+name: pets-service
+description: Subchart placeholder del microservicio de mascotas.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

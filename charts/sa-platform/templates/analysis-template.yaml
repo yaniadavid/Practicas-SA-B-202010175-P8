@@ -1,0 +1,33 @@
+{{- if .Values.rollouts.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: p8-http-smoke-analysis
+  namespace: {{ .Values.namespace.name | quote }}
+  labels:
+    {{- include "sa-platform.labels" . | nindent 4 }}
+spec:
+  args:
+    - name: service-url
+  metrics:
+    - name: smoke-endpoint
+      interval: {{ default "30s" .Values.rollouts.analysis.interval }}
+      count: {{ default 3 .Values.rollouts.analysis.count }}
+      failureLimit: {{ default 1 .Values.rollouts.analysis.failureLimit }}
+      provider:
+        job:
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: curl
+                    image: {{ default "curlimages/curl:8.10.1" .Values.rollouts.analysis.image | quote }}
+                    command:
+                      - sh
+                      - -c
+                      - >
+                        curl -fsS --max-time 5 "{{`{{args.service-url}}`}}/health"
+{{- end }}
+

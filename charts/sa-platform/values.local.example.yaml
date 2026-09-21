@@ -1,0 +1,8 @@
+secrets:
+  supabaseUrl: "https://tu-proyecto.supabase.co"
+  supabaseServiceRoleKey: "tu-service-role-key"
+  aesSecretKey: "clave-secreta-aes-de-32-bytes"
+  emailHashSecret: "clave-secreta-email-hash"
+  jwtSecret: "clave-secreta-jwt"
+  postgresPassword: "postgres-cloud-password"
+  rabbitmqPassword: "rabbitmq-cloud-password"

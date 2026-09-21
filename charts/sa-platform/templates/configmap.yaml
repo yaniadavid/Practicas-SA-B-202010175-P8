@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sa-platform-config
+  namespace: {{ .Values.namespace.name | quote }}
+  labels:
+    {{- include "sa-platform.labels" . | nindent 4 }}
+data:
+  LOG_LEVEL: {{ default "info" .Values.global.logLevel | quote }}
+  CARNE: {{ required "global.carne is required" .Values.global.carne | quote }}
+  TZ: {{ default "America/Guatemala" .Values.global.timezone | quote }}
+  COOKIE_SECURE: {{ .Values.config.cookieSecure | quote }}
+  COOKIE_SAME_SITE: {{ .Values.config.cookieSameSite | quote }}
+  JWT_TTL_SECONDS: {{ .Values.config.jwtTtlSeconds | quote }}
+  JWT_REFRESH_GRACE_SECONDS: {{ .Values.config.jwtRefreshGraceSeconds | quote }}
+  AUTHZ_MAX_RETRIES: {{ .Values.config.authzMaxRetries | quote }}
+  AUTHZ_BACKOFF_MS: {{ .Values.config.authzBackoffMs | quote }}
+  AUTHZ_TIMEOUT_MS: {{ .Values.config.authzTimeoutMs | quote }}
+  AUTHORIZATION_SERVICE_URL: "http://authorization-service:5000"
+  OWNERS_SERVICE_URL: "http://owners-service:4100"
+  PETS_SERVICE_URL: "http://pets-service:4200"
+  APPOINTMENTS_SERVICE_URL: "http://appointments-service:4300"
+  MEDICAL_RECORDS_SERVICE_URL: "http://medical-records-service:4400"
+  AUTH_SERVICE_URL: "http://auth-service:4000"
+  POSTGRES_HOST: "{{ .Release.Name }}-postgresql"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: {{ .Values.postgresql.auth.database | quote }}
+  POSTGRES_USER: {{ .Values.postgresql.auth.username | quote }}
+  RABBITMQ_HOST: "{{ .Release.Name }}-rabbitmq"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USER: {{ .Values.rabbitmq.auth.username | quote }}
+

@@ -1,0 +1,116 @@
+namespace:
+  create: false
+  name: sa-p8
+
+global:
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets:
+    - name: ghcr-pull-secret
+  logLevel: info
+  carne: "202010175"
+  timezone: "America/Guatemala"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: veterinaria-p8.example.com
+  annotations: {}
+  tls: []
+
+secrets:
+  create: false
+  name: sa-platform-secret
+  supabaseUrl: ""
+  supabaseServiceRoleKey: ""
+  aesSecretKey: ""
+  emailHashSecret: ""
+  jwtSecret: ""
+  postgresPassword: ""
+  rabbitmqPassword: ""
+
+services:
+  apiGateway:
+    image:
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-api-gateway
+      tag: v0.0.0
+    replicas: 2
+  owners:
+    image:
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-owners-service
+      tag: v0.0.0
+    replicas: 2
+  pets:
+    image:
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-pets-service
+      tag: v0.0.0
+    replicas: 2
+  appointments:
+    image:
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-appointments-service
+      tag: v0.0.0
+    replicas: 2
+  medicalRecords:
+    image:
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-medical-records-service
+      tag: v0.0.0
+    replicas: 2
+  auth:
+    image:
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-auth-service
+      tag: v0.0.0
+    replicas: 2
+  authorization:
+    image:
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-authorization-service
+      tag: v0.0.0
+    replicas: 2
+
+postgresql:
+  enabled: false
+
+rabbitmq:
+  enabled: false
+
+cronjobs:
+  enabled: false
+
+hpa:
+  enabled: false
+
+rollouts:
+  enabled: true
+  analysis:
+    image: curlimages/curl:8.10.1
+    interval: 30s
+    count: 3
+    failureLimit: 1
+  steps:
+    - setWeight: 20
+    - pause:
+        duration: 30s
+    - analysis:
+        templates:
+          - templateName: p8-http-smoke-analysis
+        args:
+          - name: service-url
+            value: http://api-gateway.sa-p8.svc.cluster.local:3000
+    - setWeight: 50
+    - pause:
+        duration: 60s
+    - analysis:
+        templates:
+          - templateName: p8-http-smoke-analysis
+        args:
+          - name: service-url
+            value: http://api-gateway.sa-p8.svc.cluster.local:3000
+    - setWeight: 100
+
+policies:
+  enabled: true
+
+security:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false

@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sa-platform-cronjob-scripts
+  namespace: {{ .Values.namespace.name | quote }}
+  labels:
+    {{- include "sa-platform.labels" . | nindent 4 }}
+data:
+  cronjob1_audit_execution.sh: |
+    #!/bin/sh
+    set -eu
+
+    echo "Ejecutando auditoria de ejecucion..."
+    export PGPASSWORD="${POSTGRES_PASSWORD:-}"
+    TIMESTAMP="$(TZ=America/Guatemala date '+%Y-%m-%d %H:%M:%S %Z')"
+    CARNE="${CARNE:-202010175}"
+    MESSAGE="${TIMESTAMP} - ${CARNE}"
+    export CRONJOB_MESSAGE="${MESSAGE}"
+
+    python - <<'PY'
+    import os
+    import psycopg2
+
+    host = os.environ.get('POSTGRES_HOST', 'sa-platform-postgresql')
+    port = os.environ.get('POSTGRES_PORT', '5432')
+    db = os.environ.get('POSTGRES_DB', 'veterinaria')
+    user = os.environ.get('POSTGRES_USER', 'veterinaria')
+    password = os.environ.get('POSTGRES_PASSWORD', '')
+    carne = os.environ.get('CARNE', '202010175')
+    message = os.environ.get('CRONJOB_MESSAGE', f"{carne} executed audit")
+
+    conn = psycopg2.connect(host=host, port=port, dbname=db, user=user, password=password)
+    conn.autocommit = True
+    with conn.cursor() as cur:
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS cronjob_audit_log (id SERIAL PRIMARY KEY, event_type VARCHAR(50) NOT NULL CHECK (event_type IN ('execution', 'summary')), carne VARCHAR(50) NOT NULL, message TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());"
+        )
+        cur.execute(
+            "INSERT INTO cronjob_audit_log (event_type, carne, message) VALUES (%s, %s, %s)",
+            ('execution', carne, message)
+        )
+    conn.close()
+    PY
+
+    echo "Registro de ejecucion insertado en PostgreSQL"
+  cronjob2_audit_summary.sh: |
+    #!/bin/sh
+    set -eu
+
+    echo "Calculando resumen por hora y publicando en RabbitMQ"
+    export PGPASSWORD="${POSTGRES_PASSWORD:-}"
+    export PYTHONUNBUFFERED=1
+
+    python - <<'PY'
+    import json
+    import os
+    import psycopg2
+    import pika
+
+    host = os.environ.get('POSTGRES_HOST', 'sa-platform-postgresql')
+    port = os.environ.get('POSTGRES_PORT', '5432')
+    db = os.environ.get('POSTGRES_DB', 'veterinaria')
+    user = os.environ.get('POSTGRES_USER', 'veterinaria')
+    password = os.environ.get('POSTGRES_PASSWORD', '')
+    carne = os.environ.get('CARNE', '202010175')
+
+    conn = psycopg2.connect(host=host, port=port, dbname=db, user=user, password=password)
+    conn.autocommit = True
+    with conn.cursor() as cur:
+        cur.execute("CREATE TABLE IF NOT EXISTS cronjob_audit_log (id SERIAL PRIMARY KEY, event_type VARCHAR(50) NOT NULL CHECK (event_type IN ('execution', 'summary')), carne VARCHAR(50) NOT NULL, message TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());")
+        cur.execute("SELECT COUNT(*) FROM cronjob_audit_log WHERE event_type = 'execution' AND created_at >= NOW() - INTERVAL '1 hour';")
+        execution_count = cur.fetchone()[0]
+        cur.execute(
+            "INSERT INTO cronjob_audit_log (event_type, carne, message) VALUES (%s, %s, %s)",
+            ('summary', carne, f"Hourly execution count: {execution_count}")
+        )
+    conn.close()
+
+    rabbitmq_host = os.environ.get('RABBITMQ_HOST', 'sa-platform-rabbitmq')
+    rabbitmq_port = int(os.environ.get('RABBITMQ_PORT', '5672'))
+    rabbitmq_user = os.environ.get('RABBITMQ_USER', 'veterinaria')
+    rabbitmq_password = os.environ.get('RABBITMQ_PASSWORD', '')
+    queue_name = os.environ.get('RABBITMQ_QUEUE', 'audit-summary')
+    message_payload = json.dumps({
+        'carne': carne,
+        'event_type': 'summary',
+        'hourly_execution_count': execution_count,
+        'status': 'published'
+    })
+    credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_password)
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port, credentials=credentials, heartbeat=30)
+    )
+    channel = connection.channel()
+    channel.queue_declare(queue=queue_name, durable=True)
+    channel.basic_publish(exchange='', routing_key=queue_name, body=message_payload.encode('utf-8'))
+    connection.close()
+    print(f"Resumen publicado en RabbitMQ: {message_payload}")
+    PY

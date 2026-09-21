@@ -1,0 +1,303 @@
+namespace:
+  create: true
+  name: sa-p6
+
+global:
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  logLevel: info
+  carne: "202010175"
+  timezone: "America/Guatemala"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: veterinaria.example.com
+  annotations: {}
+  tls: []
+
+config:
+  cookieSecure: "false"
+  cookieSameSite: lax
+  jwtTtlSeconds: "900"
+  jwtRefreshGraceSeconds: "300"
+  authzMaxRetries: "3"
+  authzBackoffMs: "500"
+  authzTimeoutMs: "2000"
+
+secrets:
+  create: true
+  name: sa-platform-secret
+  supabaseUrl: ""
+  supabaseServiceRoleKey: ""
+  aesSecretKey: ""
+  emailHashSecret: ""
+  jwtSecret: ""
+  postgresPassword: ""
+  rabbitmqPassword: ""
+
+services:
+  apiGateway:
+    name: api-gateway
+    enabled: true
+    image:
+      repository: p6-api-gateway
+      tag: "0.1.0"
+    port: 3000
+    path: /
+    replicas: 2
+    language: node
+    service:
+      type: ClusterIP
+      annotations: {}
+      loadBalancerIP: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 256Mi
+  owners:
+    name: owners-service
+    enabled: true
+    image:
+      repository: p6-owners-service
+      tag: "0.1.0"
+    port: 4100
+    path: /api/owners
+    replicas: 2
+    language: go
+    service:
+      type: ClusterIP
+      annotations: {}
+      loadBalancerIP: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 128Mi
+  pets:
+    name: pets-service
+    enabled: true
+    image:
+      repository: p6-pets-service
+      tag: "0.1.0"
+    port: 4200
+    path: /api/pets
+    replicas: 2
+    language: go
+    service:
+      type: ClusterIP
+      annotations: {}
+      loadBalancerIP: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 128Mi
+  appointments:
+    name: appointments-service
+    enabled: true
+    image:
+      repository: p6-appointments-service
+      tag: "0.1.0"
+    port: 4300
+    path: /api/appointments
+    replicas: 2
+    language: node
+    service:
+      type: ClusterIP
+      annotations: {}
+      loadBalancerIP: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 256Mi
+  medicalRecords:
+    name: medical-records-service
+    enabled: true
+    image:
+      repository: p6-medical-records-service
+      tag: "0.1.0"
+    port: 4400
+    path: /api/medical-records
+    replicas: 2
+    language: go
+    service:
+      type: ClusterIP
+      annotations: {}
+      loadBalancerIP: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64Mi
+      limits:
+        cpu: 250m
+        memory: 128Mi
+  auth:
+    name: auth-service
+    enabled: true
+    image:
+      repository: p6-auth-service
+      tag: "0.1.0"
+    port: 4000
+    path: /api/auth
+    replicas: 2
+    language: node
+    service:
+      type: ClusterIP
+      annotations: {}
+      loadBalancerIP: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 256Mi
+  authorization:
+    name: authorization-service
+    enabled: true
+    image:
+      repository: p6-authorization-service
+      tag: "0.1.0"
+    port: 5000
+    path: /api/authorization
+    replicas: 2
+    language: node
+    service:
+      type: ClusterIP
+      annotations: {}
+      loadBalancerIP: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 300m
+        memory: 256Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  cpuUtilization: 70
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+security:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+rollouts:
+  enabled: false
+  analysis:
+    image: curlimages/curl:8.10.1
+    interval: 30s
+    count: 3
+    failureLimit: 1
+  steps:
+    - setWeight: 20
+    - pause:
+        duration: 30s
+    - analysis:
+        templates:
+          - templateName: p8-http-smoke-analysis
+        args:
+          - name: service-url
+            value: http://api-gateway.sa-p8.svc.cluster.local:3000
+    - setWeight: 50
+    - pause:
+        duration: 60s
+    - analysis:
+        templates:
+          - templateName: p8-http-smoke-analysis
+        args:
+          - name: service-url
+            value: http://api-gateway.sa-p8.svc.cluster.local:3000
+    - setWeight: 100
+
+policies:
+  enabled: false
+
+resourceQuota:
+  enabled: true
+  hard:
+    requests.cpu: "6"
+    requests.memory: 6Gi
+    limits.cpu: "12"
+    limits.memory: 12Gi
+    pods: "60"
+
+limitRange:
+  enabled: true
+  default:
+    cpu: 300m
+    memory: 256Mi
+  defaultRequest:
+    cpu: 100m
+    memory: 128Mi
+
+cronjobs:
+  enabled: true
+  audit:
+    schedule: "*/2 * * * *"
+    image:
+      repository: busybox
+      tag: "1.36.1"
+  summary:
+    schedule: "*/10 * * * *"
+    image:
+      repository: busybox
+      tag: "1.36.1"
+
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 17.6.0-debian-12-r4
+  auth:
+    username: veterinaria
+    database: veterinaria
+    existingSecret: sa-platform-secret
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: postgres-password
+  primary:
+    persistence:
+      enabled: true
+      size: 1Gi
+      storageClass: ""
+    service:
+      type: ClusterIP
+
+rabbitmq:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/rabbitmq
+    tag: 4.1.3-debian-12-r1
+  auth:
+    username: veterinaria
+    existingPasswordSecret: sa-platform-secret
+    existingSecretPasswordKey: rabbitmq-password
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: ""
+  service:
+    type: ClusterIP

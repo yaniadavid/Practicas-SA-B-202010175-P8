@@ -1,0 +1,25 @@
+global:
+  logLevel: warn
+
+services:
+  apiGateway:
+    replicas: 3
+    image:
+      tag: "1.0.0"
+  owners:
+    replicas: 3
+    image:
+      tag: "1.0.0"
+  pets:
+    replicas: 3
+    image:
+      tag: "1.0.0"
+  appointments:
+    replicas: 3
+    image:
+      tag: "1.0.0"
+  medicalRecords:
+    replicas: 3
+    image:
+      tag: "1.0.0"
+

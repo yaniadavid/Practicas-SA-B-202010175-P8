@@ -1,0 +1,20 @@
+{{- if .Values.pdb.enabled }}
+{{- range $key, $svc := .Values.services }}
+{{- if $svc.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ printf "%s-pdb" $svc.name | quote }}
+  namespace: {{ $.Values.namespace.name | quote }}
+  labels:
+    {{- include "sa-platform.labels" $ | nindent 4 }}
+spec:
+  minAvailable: {{ $.Values.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $svc.name | quote }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
+

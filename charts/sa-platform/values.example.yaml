@@ -1,0 +1,9 @@
+secrets:
+  supabaseUrl: "https://example.supabase.co"
+  supabaseServiceRoleKey: "example-service-role-key"
+  aesSecretKey: "example-aes-secret"
+  emailHashSecret: "example-email-hash-secret"
+  jwtSecret: "example-jwt-secret"
+  postgresPassword: "example-postgres-password"
+  rabbitmqPassword: "example-rabbitmq-password"
+

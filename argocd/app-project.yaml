@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: sa-platform-p8
+  namespace: argocd
+spec:
+  description: Practica 8 - plataforma veterinaria GitOps
+  sourceRepos:
+    - https://github.com/yaniadavid/Practicas-SA-B-202010175-P8.git
+  destinations:
+    - namespace: sa-p8
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: kyverno.io
+      kind: ClusterPolicy
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+

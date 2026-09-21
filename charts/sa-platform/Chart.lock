@@ -1,0 +1,30 @@
+dependencies:
+- name: api-gateway
+  repository: file://charts/api-gateway
+  version: 0.1.0
+- name: owners-service
+  repository: file://charts/owners-service
+  version: 0.1.0
+- name: pets-service
+  repository: file://charts/pets-service
+  version: 0.1.0
+- name: appointments-service
+  repository: file://charts/appointments-service
+  version: 0.1.0
+- name: medical-records-service
+  repository: file://charts/medical-records-service
+  version: 0.1.0
+- name: auth-service
+  repository: file://charts/auth-service
+  version: 0.1.0
+- name: authorization-service
+  repository: file://charts/authorization-service
+  version: 0.1.0
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 15.5.38
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: 14.6.6
+digest: sha256:14bd4eabdf3e4a1945dc8ef7bd8cc70058c7bcd33ba9f75a11aa1e6a795c0f9d
+generated: "2026-08-28T21:46:09.4281968-06:00"

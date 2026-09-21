@@ -1,0 +1,83 @@
+namespace:
+  create: true
+  name: sa-p6
+
+global:
+  imagePullPolicy: IfNotPresent
+  # Use this only when the registry is private.
+  # imagePullSecrets:
+  #   - name: registry-credentials
+  imagePullSecrets: []
+  logLevel: info
+
+# Option A: expose the gateway directly with a cloud LoadBalancer.
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  annotations: {}
+  tls: []
+
+services:
+  apiGateway:
+    image:
+      # Replace with your real registry path.
+      # GKE Artifact Registry example:
+      # us-central1-docker.pkg.dev/PROJECT_ID/sa-veterinaria/p6-api-gateway
+      repository: REGISTRY_URL/p6-api-gateway
+      tag: "1.0.0"
+    service:
+      type: LoadBalancer
+      annotations: {}
+      loadBalancerIP: ""
+  owners:
+    image:
+      repository: REGISTRY_URL/p6-owners-service
+      tag: "1.0.0"
+  pets:
+    image:
+      repository: REGISTRY_URL/p6-pets-service
+      tag: "1.0.0"
+  appointments:
+    image:
+      repository: REGISTRY_URL/p6-appointments-service
+      tag: "1.0.0"
+  medicalRecords:
+    image:
+      repository: REGISTRY_URL/p6-medical-records-service
+      tag: "1.0.0"
+  auth:
+    image:
+      repository: REGISTRY_URL/p6-auth-service
+      tag: "1.0.0"
+  authorization:
+    image:
+      repository: REGISTRY_URL/p6-authorization-service
+      tag: "1.0.0"
+
+postgresql:
+  primary:
+    persistence:
+      # Replace with the provider StorageClass if needed.
+      # GKE examples: standard-rwo, premium-rwo
+      # EKS examples: gp2, gp3
+      # AKS examples: managed-csi, managed-csi-premium
+      storageClass: ""
+      size: 1Gi
+
+rabbitmq:
+  persistence:
+    storageClass: ""
+    size: 1Gi
+
+# Option B: use an Ingress controller instead of a LoadBalancer Service.
+# ingress:
+#   enabled: true
+#   className: nginx
+#   host: veterinaria.example.com
+#   annotations:
+#     nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+# services:
+#   apiGateway:
+#     service:
+#       type: ClusterIP

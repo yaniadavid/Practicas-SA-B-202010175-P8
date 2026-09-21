@@ -1,0 +1,65 @@
+namespace:
+  create: true
+  name: sa-p6
+
+global:
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  logLevel: info
+
+# AWS path recommended for this practice: expose api-gateway through an
+# AWS Network/Classic Load Balancer created by Service type LoadBalancer.
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  annotations: {}
+  tls: []
+
+services:
+  apiGateway:
+    image:
+      # Replace ACCOUNT_ID, REGION and repository names with your ECR values.
+      repository: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/p6-api-gateway
+      tag: "1.0.0"
+    service:
+      type: LoadBalancer
+      annotations: {}
+      loadBalancerIP: ""
+  owners:
+    image:
+      repository: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/p6-owners-service
+      tag: "1.0.0"
+  pets:
+    image:
+      repository: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/p6-pets-service
+      tag: "1.0.0"
+  appointments:
+    image:
+      repository: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/p6-appointments-service
+      tag: "1.0.0"
+  medicalRecords:
+    image:
+      repository: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/p6-medical-records-service
+      tag: "1.0.0"
+  auth:
+    image:
+      repository: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/p6-auth-service
+      tag: "1.0.0"
+  authorization:
+    image:
+      repository: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/p6-authorization-service
+      tag: "1.0.0"
+
+postgresql:
+  primary:
+    persistence:
+      # gp2 is commonly available in EKS clusters. Use gp3 if your cluster
+      # has a gp3 StorageClass configured.
+      storageClass: "gp2"
+      size: 1Gi
+
+rabbitmq:
+  persistence:
+    storageClass: "gp2"
+    size: 1Gi

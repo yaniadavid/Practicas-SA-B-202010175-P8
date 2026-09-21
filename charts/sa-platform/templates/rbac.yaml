@@ -1,0 +1,39 @@
+{{- range $key, $svc := .Values.services }}
+{{- if $svc.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $svc.name | quote }}
+  namespace: {{ $.Values.namespace.name | quote }}
+  labels:
+    {{- include "sa-platform.labels" $ | nindent 4 }}
+{{- with $.Values.global.imagePullSecrets }}
+imagePullSecrets:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ printf "%s-role" $svc.name | quote }}
+  namespace: {{ $.Values.namespace.name | quote }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ printf "%s-rolebinding" $svc.name | quote }}
+  namespace: {{ $.Values.namespace.name | quote }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $svc.name | quote }}
+roleRef:
+  kind: Role
+  name: {{ printf "%s-role" $svc.name | quote }}
+  apiGroup: rbac.authorization.k8s.io
+---
+{{- end }}
+{{- end }}

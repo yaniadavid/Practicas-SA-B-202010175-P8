@@ -1,0 +1,7 @@
+apiVersion: v2
+name: api-gateway
+description: Subchart placeholder del API Gateway. Los recursos se generan desde el chart padre parametrizado.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

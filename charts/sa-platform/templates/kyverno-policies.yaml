@@ -1,0 +1,80 @@
+{{- if .Values.policies.enabled }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: p8-disallow-latest-tag
+  labels:
+    {{- include "sa-platform.labels" . | nindent 4 }}
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-versioned-image-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Las imagenes no pueden usar latest."
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: p8-require-cpu-memory-limits
+  labels:
+    {{- include "sa-platform.labels" . | nindent 4 }}
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-requests-and-limits
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Cada contenedor debe definir requests y limits de CPU y memoria."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"
+                  limits:
+                    cpu: "?*"
+                    memory: "?*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: p8-require-non-root
+  labels:
+    {{- include "sa-platform.labels" . | nindent 4 }}
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Los pods deben ejecutarse sin privilegios de root."
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: false
+{{- end }}
+

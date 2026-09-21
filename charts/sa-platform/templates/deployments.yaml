@@ -1,0 +1,82 @@
+{{- range $key, $svc := .Values.services }}
+{{- if and $svc.enabled (not $.Values.rollouts.enabled) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $svc.name | quote }}
+  namespace: {{ $.Values.namespace.name | quote }}
+  labels:
+    {{- include "sa-platform.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $svc.name | quote }}
+spec:
+  {{- if not $.Values.hpa.enabled }}
+  replicas: {{ default 2 $svc.replicas }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $svc.name | quote }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: {{ $svc.name | quote }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum | quote }}
+    spec:
+      serviceAccountName: {{ $svc.name | quote }}
+      {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: {{ $.Values.security.runAsNonRoot }}
+        runAsUser: {{ $.Values.security.runAsUser }}
+        runAsGroup: {{ $.Values.security.runAsGroup }}
+      containers:
+        - name: {{ $svc.name | quote }}
+          image: {{ include "sa-platform.image" $svc }}
+          imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $svc.port }}
+          env:
+            - name: PORT
+              value: {{ $svc.port | quote }}
+          envFrom:
+            - configMapRef:
+                name: sa-platform-config
+            - secretRef:
+                name: {{ default "sa-platform-secret" $.Values.secrets.name | quote }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 12
+            periodSeconds: 5
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+          securityContext:
+            readOnlyRootFilesystem: {{ $.Values.security.readOnlyRootFilesystem }}
+            allowPrivilegeEscalation: {{ $.Values.security.allowPrivilegeEscalation }}
+            capabilities:
+              drop:
+                - ALL
+---
+{{- end }}
+{{- end }}

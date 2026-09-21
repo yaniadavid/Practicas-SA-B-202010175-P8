@@ -1,0 +1,8 @@
+{{- if and .Values.namespace.create (ne .Release.Namespace .Values.namespace.name) }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ required "namespace.name is required" .Values.namespace.name | quote }}
+  labels:
+    {{- include "sa-platform.labels" . | nindent 4 }}
+{{- end }}
