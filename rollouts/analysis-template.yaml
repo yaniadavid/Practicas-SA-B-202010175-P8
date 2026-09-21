@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: p8-http-smoke-analysis
+  namespace: sa-p8
+spec:
+  args:
+    - name: service-url
+  metrics:
+    - name: smoke-endpoint
+      interval: 30s
+      count: 3
+      failureLimit: 1
+      provider:
+        job:
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: curl
+                    image: curlimages/curl:8.10.1
+                    command:
+                      - sh
+                      - -c
+                      - curl -fsS --max-time 5 "{{args.service-url}}/health"
