@@ -28,37 +28,37 @@ services:
   apiGateway:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-api-gateway
-      tag: v1.0.3
+      tag: v1.0.4
     replicas: 2
   owners:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-owners-service
-      tag: v1.0.3
+      tag: v1.0.4
     replicas: 2
   pets:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-pets-service
-      tag: v1.0.3
+      tag: v1.0.4
     replicas: 2
   appointments:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-appointments-service
-      tag: v1.0.3
+      tag: v1.0.4
     replicas: 2
   medicalRecords:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-medical-records-service
-      tag: v1.0.3
+      tag: v1.0.4
     replicas: 2
   auth:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-auth-service
-      tag: v1.0.3
+      tag: v1.0.4
     replicas: 2
   authorization:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-authorization-service
-      tag: v1.0.3
+      tag: v1.0.4
     replicas: 2
 postgresql:
   enabled: false
