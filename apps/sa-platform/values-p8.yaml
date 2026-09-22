@@ -1,7 +1,6 @@
 namespace:
   create: false
   name: sa-p8
-
 global:
   imagePullPolicy: IfNotPresent
   imagePullSecrets:
@@ -9,14 +8,12 @@ global:
   logLevel: info
   carne: "202010175"
   timezone: "America/Guatemala"
-
 ingress:
   enabled: true
   className: nginx
   host: veterinaria-p8.example.com
   annotations: {}
   tls: []
-
 secrets:
   create: false
   name: sa-platform-secret
@@ -27,56 +24,50 @@ secrets:
   jwtSecret: ""
   postgresPassword: ""
   rabbitmqPassword: ""
-
 services:
   apiGateway:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-api-gateway
-      tag: v0.0.0
+      tag: v1.0.3
     replicas: 2
   owners:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-owners-service
-      tag: v0.0.0
+      tag: v1.0.3
     replicas: 2
   pets:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-pets-service
-      tag: v0.0.0
+      tag: v1.0.3
     replicas: 2
   appointments:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-appointments-service
-      tag: v0.0.0
+      tag: v1.0.3
     replicas: 2
   medicalRecords:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-medical-records-service
-      tag: v0.0.0
+      tag: v1.0.3
     replicas: 2
   auth:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-auth-service
-      tag: v0.0.0
+      tag: v1.0.3
     replicas: 2
   authorization:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-authorization-service
-      tag: v0.0.0
+      tag: v1.0.3
     replicas: 2
-
 postgresql:
   enabled: false
-
 rabbitmq:
   enabled: false
-
 cronjobs:
   enabled: false
-
 hpa:
   enabled: false
-
 rollouts:
   enabled: true
   analysis:
@@ -104,10 +95,8 @@ rollouts:
           - name: service-url
             value: http://api-gateway.sa-p8.svc.cluster.local:3000
     - setWeight: 100
-
 policies:
   enabled: true
-
 security:
   runAsNonRoot: true
   runAsUser: 10001
