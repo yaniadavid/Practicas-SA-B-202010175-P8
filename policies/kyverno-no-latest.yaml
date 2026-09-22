@@ -14,8 +14,10 @@ spec:
                 - Pod
       validate:
         message: "Las imagenes no pueden usar latest."
-        pattern:
-          spec:
-            containers:
-              - image: "!*:latest"
-
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.containers[].image }}"
+                operator: AnyIn
+                value:
+                  - "*:latest"

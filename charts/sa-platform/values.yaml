@@ -28,13 +28,13 @@ config:
 secrets:
   create: true
   name: sa-platform-secret
-  supabaseUrl: ""
-  supabaseServiceRoleKey: ""
-  aesSecretKey: ""
-  emailHashSecret: ""
-  jwtSecret: ""
-  postgresPassword: ""
-  rabbitmqPassword: ""
+  supabaseUrl: "https://example.supabase.co"
+  supabaseServiceRoleKey: "example-service-role-key"
+  aesSecretKey: "example-aes-secret-key"
+  emailHashSecret: "example-email-hash-secret"
+  jwtSecret: "example-jwt-secret"
+  postgresPassword: "example-postgres-password"
+  rabbitmqPassword: "example-rabbitmq-password"
 
 services:
   apiGateway:
