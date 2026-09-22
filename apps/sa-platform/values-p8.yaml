@@ -1,6 +1,7 @@
 namespace:
   create: false
   name: sa-p8
+
 global:
   imagePullPolicy: IfNotPresent
   imagePullSecrets:
@@ -8,12 +9,14 @@ global:
   logLevel: info
   carne: "202010175"
   timezone: "America/Guatemala"
+
 ingress:
   enabled: true
   className: nginx
   host: veterinaria-p8.example.com
   annotations: {}
   tls: []
+
 secrets:
   create: false
   name: sa-platform-secret
@@ -24,50 +27,56 @@ secrets:
   jwtSecret: ""
   postgresPassword: ""
   rabbitmqPassword: ""
+
 services:
   apiGateway:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-api-gateway
       tag: v1.0.3
-    replicas: 2
+    replicas: 1
   owners:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-owners-service
       tag: v1.0.3
-    replicas: 2
+    replicas: 1
   pets:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-pets-service
       tag: v1.0.3
-    replicas: 2
+    replicas: 1
   appointments:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-appointments-service
       tag: v1.0.3
-    replicas: 2
+    replicas: 1
   medicalRecords:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-medical-records-service
       tag: v1.0.3
-    replicas: 2
+    replicas: 1
   auth:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-auth-service
       tag: v1.0.3
-    replicas: 2
+    replicas: 1
   authorization:
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-authorization-service
       tag: v1.0.3
-    replicas: 2
+    replicas: 1
+
 postgresql:
   enabled: false
+
 rabbitmq:
   enabled: false
+
 cronjobs:
   enabled: false
+
 hpa:
   enabled: false
+
 rollouts:
   enabled: true
   analysis:
@@ -95,8 +104,16 @@ rollouts:
           - name: service-url
             value: http://api-gateway.sa-p8.svc.cluster.local:3000
     - setWeight: 100
+    - analysis:
+        templates:
+          - templateName: p8-http-smoke-analysis
+        args:
+          - name: service-url
+            value: http://api-gateway.sa-p8.svc.cluster.local:3000
+
 policies:
   enabled: true
+
 security:
   runAsNonRoot: true
   runAsUser: 10001
