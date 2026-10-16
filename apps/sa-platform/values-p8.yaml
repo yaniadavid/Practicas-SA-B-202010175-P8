@@ -83,6 +83,8 @@ services:
 postgresql:
   enabled: true
   primary:
+    podSecurityContext:
+      runAsNonRoot: true
     persistence:
       enabled: true
       size: 1Gi
