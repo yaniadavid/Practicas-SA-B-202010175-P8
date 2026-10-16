@@ -1,7 +1,6 @@
 namespace:
   create: false
   name: sa-p8
-
 global:
   imagePullPolicy: IfNotPresent
   imagePullSecrets:
@@ -9,14 +8,12 @@ global:
   logLevel: info
   carne: "202010175"
   timezone: "America/Guatemala"
-
 ingress:
   enabled: true
   className: nginx
   host: veterinaria-p8.example.com
   annotations: {}
   tls: []
-
 secrets:
   create: false
   name: sa-platform-secret
@@ -27,20 +24,17 @@ secrets:
   jwtSecret: ""
   postgresPassword: ""
   rabbitmqPassword: ""
-
 config:
   appointmentsStorage: postgres
-
 observability:
   enabled: true
   otlpEndpoint: http://otel-collector.observability.svc.cluster.local:4318
-
 services:
   apiGateway:
     enabled: true
     image:
-      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-api-gateway
-      tag: v1.0.7
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p10-api-gateway
+      tag: v1.0.1
     replicas: 2
     antiAffinity: true
   owners:
@@ -53,15 +47,15 @@ services:
   pets:
     enabled: true
     image:
-      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-pets-service
-      tag: v1.0.7
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p10-pets-service
+      tag: v1.0.1
     replicas: 2
     antiAffinity: true
   appointments:
     enabled: true
     image:
-      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-appointments-service
-      tag: v1.0.7
+      repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p10-appointments-service
+      tag: v1.0.1
     replicas: 2
     antiAffinity: true
     livenessPath: /live
@@ -83,7 +77,6 @@ services:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-authorization-service
       tag: v1.0.7
     replicas: 1
-
 postgresql:
   enabled: true
   primary:
@@ -94,16 +87,12 @@ postgresql:
       size: 1Gi
       # Set this to the StorageClass available in the target cluster.
       storageClass: gp3
-
 rabbitmq:
   enabled: false
-
 cronjobs:
   enabled: false
-
 hpa:
   enabled: false
-
 rollouts:
   enabled: true
   analysis:
@@ -137,10 +126,8 @@ rollouts:
         args:
           - name: service-url
             value: http://api-gateway.sa-p8.svc.cluster.local:3000
-
 policies:
   enabled: true
-
 security:
   runAsNonRoot: true
   runAsUser: 10001
