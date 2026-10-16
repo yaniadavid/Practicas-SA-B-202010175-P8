@@ -1,3 +1,4 @@
+{{- $obs := default dict .Values.observability }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -26,6 +27,11 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/component: api-gateway
+        {{- if and (eq $svc.name "pets-service") (default false $obs.enabled) }}
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: appointments-service
+        {{- end }}
       ports:
         - protocol: TCP
           port: {{ $svc.port }}

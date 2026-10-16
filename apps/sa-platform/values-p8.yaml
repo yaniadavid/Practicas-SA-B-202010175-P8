@@ -31,6 +31,10 @@ secrets:
 config:
   appointmentsStorage: postgres
 
+observability:
+  enabled: true
+  otlpEndpoint: http://otel-collector.observability.svc.cluster.local:4318
+
 services:
   apiGateway:
     enabled: true

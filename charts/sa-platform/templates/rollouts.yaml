@@ -1,3 +1,4 @@
+{{- $obs := default dict .Values.observability }}
 {{- range $key, $svc := .Values.services }}
 {{- if and $svc.enabled $.Values.rollouts.enabled }}
 apiVersion: argoproj.io/v1alpha1
@@ -64,6 +65,16 @@ spec:
           env:
             - name: PORT
               value: {{ $svc.port | quote }}
+            {{- if and (default false $obs.enabled) (has $svc.name (list "api-gateway" "appointments-service" "pets-service")) }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ $svc.name | quote }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ $obs.otlpEndpoint | quote }}
+            - name: ROLLOUT_HASH
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['rollouts-pod-template-hash']
+            {{- end }}
             {{- if eq $svc.name "appointments-service" }}
             - name: POSTGRES_PASSWORD
               valueFrom:
@@ -76,6 +87,10 @@ spec:
                   name: {{ default "sa-platform-secret" $.Values.secrets.name | quote }}
                   key: appointments-write-token
                   optional: true
+            {{- if default false $obs.enabled }}
+            - name: PETS_SERVICE_URL
+              value: http://pets-service:4200
+            {{- end }}
             {{- end }}
           envFrom:
             - configMapRef:
