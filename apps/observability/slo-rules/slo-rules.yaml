@@ -42,7 +42,7 @@ spec:
         - record: p10:availability:budget_used7d
           expr: p10:availability:bad:increase7d / clamp_min(p10:availability:eligible:increase7d, 1) / 0.0001
         - record: p10:availability:sli7d
-          expr: 1 - p10:availability:bad:increase7d / clamp_min(p10:availability:eligible:increase7d, 1)
+          expr: (1 - p10:availability:bad:increase7d / clamp_min(p10:availability:eligible:increase7d, 1)) and (p10:availability:eligible:increase7d > 0)
         - record: p10:latency:burn5m
           expr: clamp_min(p10:latency:eligible:increase5m - p10:latency:good:increase5m, 0) / clamp_min(p10:latency:eligible:increase5m, 1) / 0.0001
         - record: p10:latency:burn1h
@@ -50,7 +50,7 @@ spec:
         - record: p10:latency:budget_used7d
           expr: clamp_min(p10:latency:eligible:increase7d - p10:latency:good:increase7d, 0) / clamp_min(p10:latency:eligible:increase7d, 1) / 0.0001
         - record: p10:latency:sli7d
-          expr: p10:latency:good:increase7d / clamp_min(p10:latency:eligible:increase7d, 1)
+          expr: (p10:latency:good:increase7d / clamp_min(p10:latency:eligible:increase7d, 1)) and (p10:latency:eligible:increase7d > 0)
     - name: p10-appointments-alerts
       interval: 30s
       rules:

@@ -137,7 +137,7 @@
     },
     {
       "id": 3,
-      "title": "Presupuesto disponibilidad consumido",
+      "title": "Presupuesto disp. 7d",
       "description": "1 = 100% del presupuesto de errores de 7 días.",
       "type": "stat",
       "gridPos": {
@@ -185,7 +185,7 @@
           },
           "expr": "p10:availability:budget_used7d",
           "refId": "A",
-          "legendFormat": "Presupuesto disponibilidad consumido"
+          "legendFormat": "Presupuesto disp. 7d"
         }
       ],
       "options": {
@@ -204,7 +204,7 @@
     },
     {
       "id": 4,
-      "title": "Presupuesto latencia consumido",
+      "title": "Presupuesto latencia 7d",
       "description": "1 = 100% del presupuesto de latencia de 7 días.",
       "type": "stat",
       "gridPos": {
@@ -252,7 +252,7 @@
           },
           "expr": "p10:latency:budget_used7d",
           "refId": "A",
-          "legendFormat": "Presupuesto latencia consumido"
+          "legendFormat": "Presupuesto latencia 7d"
         }
       ],
       "options": {
@@ -486,7 +486,7 @@
           },
           "expr": "sum by (container) (rate(container_cpu_usage_seconds_total{namespace=\"sa-p8\",container=~\"api-gateway|appointments-service|pets-service\"}[5m])) / on (container) group_left() sum by (container) (kube_pod_container_resource_limits{namespace=\"sa-p8\",container=~\"api-gateway|appointments-service|pets-service\",resource=\"cpu\"})",
           "refId": "A",
-          "legendFormat": "Saturación · CPU"
+          "legendFormat": "{{container}}"
         }
       ],
       "options": {
@@ -532,7 +532,7 @@
           },
           "expr": "sum by (container) (container_memory_working_set_bytes{namespace=\"sa-p8\",container=~\"api-gateway|appointments-service|pets-service\"}) / on (container) group_left() sum by (container) (kube_pod_container_resource_limits{namespace=\"sa-p8\",container=~\"api-gateway|appointments-service|pets-service\",resource=\"memory\"})",
           "refId": "A",
-          "legendFormat": "Saturación · memoria"
+          "legendFormat": "{{container}}"
         }
       ],
       "options": {
