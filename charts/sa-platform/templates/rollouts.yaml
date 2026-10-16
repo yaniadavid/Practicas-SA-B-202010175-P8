@@ -78,6 +78,9 @@ spec:
         app.kubernetes.io/component: {{ $svc.name | quote }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum | quote }}
+        {{- if and (eq $svc.name "pets-service") (default "" $svc.drillId) }}
+        p10.sa/drill-id: {{ $svc.drillId | quote }}
+        {{- end }}
     spec:
       serviceAccountName: {{ $svc.name | quote }}
       {{- if $svc.antiAffinity }}

@@ -46,6 +46,7 @@ services:
     antiAffinity: true
   pets:
     enabled: true
+    drillId: "latency-2"
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p10-pets-service
       tag: v1.0.3
