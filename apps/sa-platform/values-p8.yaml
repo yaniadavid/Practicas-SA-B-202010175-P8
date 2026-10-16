@@ -87,7 +87,7 @@ postgresql:
       enabled: true
       size: 1Gi
       # Set this to the StorageClass available in the target cluster.
-      storageClass: ""
+      storageClass: gp3
 
 rabbitmq:
   enabled: false

@@ -1,0 +1,46 @@
+credentials:
+  useSecret: false
+
+serviceAccount:
+  server:
+    create: true
+    name: velero-server
+
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.14.4
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: sa-p9-velero-backups-536882095007-us-east-1
+      default: true
+      config:
+        region: us-east-1
+  volumeSnapshotLocation:
+    - name: default
+      provider: aws
+      config:
+        region: us-east-1
+
+snapshotsEnabled: true
+deployNodeAgent: false
+
+schedules:
+  sa-platform-hourly:
+    schedule: "0 * * * *"
+    template:
+      ttl: 168h
+      storageLocation: default
+      volumeSnapshotLocations:
+        - default
+      includedNamespaces:
+        - sa-p8
+      excludedResources:
+        - secrets
+      snapshotVolumes: true

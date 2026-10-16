@@ -1,24 +1,15 @@
-# Secretos
+# Secretos de P9
 
-No colocar secretos en texto plano en este repositorio.
-
-Alternativas de la base P8:
-
-- Sealed Secrets: guardar aqui manifiestos `SealedSecret`.
-- External Secrets: guardar aqui `ExternalSecret` que referencien el proveedor
-  externo.
+P9 usa External Secrets con AWS Secrets Manager y EKS Pod Identity. El
+`SecretStore` y los dos `ExternalSecret` de esta carpeta se sincronizan por
+ArgoCD. Requieren el secreto externo `p9/sa-platform` en `us-east-1`.
 
 La Application de ArgoCD sincroniza los manifiestos `*.yaml` de esta carpeta.
-El archivo `sa-platform-sealed-secret.yaml.example` es solo una guia: no se
-sincroniza y sus valores no son validos. La llave privada del antiguo cluster
-P8 no tiene respaldo, por lo que ese ejemplo no permite recuperar sus
-secretos. Para P9 se usara AWS Secrets Manager con External Secrets. El
-`ExternalSecret` futuro debe producir `sa-platform-secret` en `sa-p8`, con
-`postgres-password`, `appointments-write-token` y cualquier otra clave que
-necesiten los servicios activados. Nunca guardar el Secret original sin cifrar
-aqui.
+El ejemplo `sa-platform-sealed-secret.yaml.example` es solo una guia historica:
+no se sincroniza y sus valores no son validos. La llave privada del antiguo
+cluster P8 no tiene respaldo.
 
-El archivo `apps/sa-platform/values-p8.yaml` deja los secretos vacios de forma
-intencional. Los secretos de P9 deberan existir fuera de EKS antes de la prueba
-de destruccion y la identidad IAM debera poder recuperarse al reconstruirlo.
+Los secretos reales deben ingresarse directamente en AWS Secrets Manager,
+nunca en Git. Consulte `P9/docs/etapa3.md` en el repositorio de codigo para la
+estructura, verificaciones y procedimiento de recuperacion.
 
