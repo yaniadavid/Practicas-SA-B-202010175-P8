@@ -28,31 +28,39 @@ secrets:
   postgresPassword: ""
   rabbitmqPassword: ""
 
+config:
+  appointmentsStorage: postgres
+
 services:
   apiGateway:
     enabled: true
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-api-gateway
       tag: v1.0.4
-    replicas: 1
+    replicas: 2
+    antiAffinity: true
   owners:
-    enabled: false
+    enabled: true
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-owners-service
       tag: v1.0.4
-    replicas: 1
+    replicas: 2
+    antiAffinity: true
   pets:
-    enabled: false
+    enabled: true
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-pets-service
       tag: v1.0.4
-    replicas: 1
+    replicas: 2
+    antiAffinity: true
   appointments:
-    enabled: false
+    enabled: true
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p8-appointments-service
       tag: v1.0.4
-    replicas: 1
+    replicas: 2
+    antiAffinity: true
+    livenessPath: /live
   medicalRecords:
     enabled: false
     image:
@@ -73,7 +81,13 @@ services:
     replicas: 1
 
 postgresql:
-  enabled: false
+  enabled: true
+  primary:
+    persistence:
+      enabled: true
+      size: 1Gi
+      # Set this to the StorageClass available in the target cluster.
+      storageClass: ""
 
 rabbitmq:
   enabled: false

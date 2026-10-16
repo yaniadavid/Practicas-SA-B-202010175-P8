@@ -5,13 +5,18 @@ metadata:
   namespace: argocd
 spec:
   project: sa-platform-p8
-  source:
-    repoURL: https://github.com/yaniadavid/Practicas-SA-B-202010175-P8.git
-    targetRevision: main
-    path: charts/sa-platform
-    helm:
-      valueFiles:
-        - ../../apps/sa-platform/values-p8.yaml
+  sources:
+    - repoURL: https://github.com/yaniadavid/Practicas-SA-B-202010175-P8.git
+      targetRevision: main
+      path: charts/sa-platform
+      helm:
+        valueFiles:
+          - ../../apps/sa-platform/values-p8.yaml
+    - repoURL: https://github.com/yaniadavid/Practicas-SA-B-202010175-P8.git
+      targetRevision: main
+      path: secrets
+      directory:
+        include: '*.yaml'
   destination:
     server: https://kubernetes.default.svc
     namespace: sa-p8

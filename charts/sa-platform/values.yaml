@@ -24,6 +24,7 @@ config:
   authzMaxRetries: "3"
   authzBackoffMs: "500"
   authzTimeoutMs: "2000"
+  appointmentsStorage: memory
 
 secrets:
   create: true
