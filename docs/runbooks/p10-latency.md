@@ -8,7 +8,7 @@ Entre los `POST /api/appointments` exitosos, la proporción que tardó más de 1
 
 1. Abrir **P10 · Citas · SLO y señales de oro**. Comparar *Latencia p95*, *Presupuesto latencia consumido*, *Tráfico* y *Saturación*.
 2. Consultar `p10:latency:burn5m`, `p10:latency:burn1h` y `p10:latency:eligible:increase5m`; comprobar que el bucket `le="1"` de `sa_http_request_duration_slo_seconds_bucket` tiene datos.
-3. En Tempo buscar trazas lentas de `POST /api/appointments` y localizar el span que más tarda. Usar el `trace_id` para revisar logs de gateway, citas y mascotas en Loki.
+3. En Tempo buscar trazas lentas de `POST /api/appointments` y localizar el span que más tarda. Usar el `trace_id` para revisar logs en Loki con `{k8s_namespace_name="sa-p8"} | json | trace_id="<id>"`; el evento `pet_lookup_injected_delay` identifica la demora de prueba en mascotas.
 4. Verificar CPU y memoria de los pods `sa-p8`, reinicios y dependencias. Comprobar si el aumento coincide con un despliegue o con mayor tráfico.
 
 ## Intervención

@@ -8,7 +8,7 @@ El gateway respondió 5xx a `POST /api/appointments` a un ritmo superior a 14.4 
 
 1. Abrir el tablero **P10 · Citas · SLO y señales de oro**. Leer *Disponibilidad 7d*, *Presupuesto disponibilidad consumido*, *Errores 5xx* y *Tráfico*.
 2. En Prometheus comparar `p10:availability:burn5m`, `p10:availability:burn1h` y `p10:availability:eligible:increase5m`. Confirmar que las series recientes existen y que el tráfico mínimo se cumple.
-3. En Grafana Explore → Loki filtrar `{namespace="sa-p8", app="api-gateway"} | json | level="error"` y luego citas y mascotas. Abrir un `trace_id` de error en Tempo para localizar el salto fallido.
+3. En Grafana Explore → Loki filtrar `{k8s_namespace_name="sa-p8", k8s_container_name="api-gateway"} | json | level="error"` y luego citas y mascotas. Abrir un `trace_id` de error en Tempo para localizar el salto fallido.
 4. Revisar pods, restarts y eventos: `kubectl --kubeconfig P9/.runtime/kubeconfig -n sa-p8 get pods` y `kubectl --kubeconfig P9/.runtime/kubeconfig -n sa-p8 get events --sort-by=.lastTimestamp`.
 
 ## Intervención
