@@ -16,6 +16,7 @@ data:
   AUTHZ_MAX_RETRIES: {{ .Values.config.authzMaxRetries | quote }}
   AUTHZ_BACKOFF_MS: {{ .Values.config.authzBackoffMs | quote }}
   AUTHZ_TIMEOUT_MS: {{ .Values.config.authzTimeoutMs | quote }}
+  APPOINTMENTS_STORAGE: {{ default "memory" .Values.config.appointmentsStorage | quote }}
   AUTHORIZATION_SERVICE_URL: "http://authorization-service:5000"
   OWNERS_SERVICE_URL: "http://owners-service:4100"
   PETS_SERVICE_URL: "http://pets-service:4200"

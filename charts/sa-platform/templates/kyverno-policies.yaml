@@ -15,6 +15,12 @@ spec:
           - resources:
               kinds:
                 - Pod
+              namespaces:
+                - {{ .Values.namespace.name | quote }}
+              selector:
+                matchExpressions:
+                  - key: app.kubernetes.io/component
+                    operator: Exists
       validate:
         message: "Las imagenes no pueden usar latest."
         deny:
@@ -41,6 +47,12 @@ spec:
           - resources:
               kinds:
                 - Pod
+              namespaces:
+                - {{ .Values.namespace.name | quote }}
+              selector:
+                matchExpressions:
+                  - key: app.kubernetes.io/component
+                    operator: Exists
       validate:
         message: "Cada contenedor debe definir requests y limits de CPU y memoria."
         pattern:
@@ -70,6 +82,12 @@ spec:
           - resources:
               kinds:
                 - Pod
+              namespaces:
+                - {{ .Values.namespace.name | quote }}
+              selector:
+                matchExpressions:
+                  - key: app.kubernetes.io/component
+                    operator: Exists
       validate:
         message: "Los pods deben ejecutarse sin privilegios de root."
         pattern:

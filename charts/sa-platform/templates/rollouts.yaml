@@ -28,6 +28,24 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum | quote }}
     spec:
       serviceAccountName: {{ $svc.name | quote }}
+      {{- if $svc.antiAffinity }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: {{ $svc.name | quote }}
+                topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/component: {{ $svc.name | quote }}
+      {{- end }}
       {{- with $.Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -46,6 +64,19 @@ spec:
           env:
             - name: PORT
               value: {{ $svc.port | quote }}
+            {{- if eq $svc.name "appointments-service" }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default "sa-platform-secret" $.Values.secrets.name | quote }}
+                  key: postgres-password
+            - name: APPOINTMENTS_WRITE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default "sa-platform-secret" $.Values.secrets.name | quote }}
+                  key: appointments-write-token
+                  optional: true
+            {{- end }}
           envFrom:
             - configMapRef:
                 name: sa-platform-config
@@ -53,19 +84,19 @@ spec:
                 name: {{ default "sa-platform-secret" $.Values.secrets.name | quote }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ default "/health" $svc.livenessPath }}
               port: http
             initialDelaySeconds: 20
             periodSeconds: 15
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ default "/health" $svc.readinessPath }}
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
           startupProbe:
             httpGet:
-              path: /health
+              path: {{ default "/health" $svc.readinessPath }}
               port: http
             failureThreshold: 12
             periodSeconds: 5

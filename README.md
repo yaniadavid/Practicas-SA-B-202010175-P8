@@ -20,11 +20,13 @@ policies/
   kyverno-*.yaml
 secrets/
   README.md
+  sa-platform-sealed-secret.yaml.example
 charts/
   sa-platform/
 ```
 
-ArgoCD sincroniza `charts/sa-platform` con `apps/sa-platform/values-p8.yaml`.
+ArgoCD sincroniza `charts/sa-platform` con `apps/sa-platform/values-p8.yaml`
+y los manifiestos `*.yaml` en `secrets/`.
 Ese chart renderiza los `Rollout`, `AnalysisTemplate` y `ClusterPolicy` cuando
 `rollouts.enabled` y `policies.enabled` estan activos. Las carpetas `rollouts/`
 y `policies/` quedan como copias de referencia y evidencia legible.
