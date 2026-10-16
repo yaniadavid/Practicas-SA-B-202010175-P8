@@ -1,6 +1,7 @@
 {{- $obs := default dict .Values.observability }}
 {{- range $key, $svc := .Values.services }}
 {{- if and $svc.enabled $.Values.rollouts.enabled }}
+{{- $p10 := and (default false $obs.enabled) (has $svc.name (list "api-gateway" "appointments-service" "pets-service")) }}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -17,9 +18,59 @@ spec:
       app.kubernetes.io/component: {{ $svc.name | quote }}
   strategy:
     canary:
+      {{- if $p10 }}
+      steps:
+        - setWeight: 20
+        - pause:
+            duration: 240s
+        - analysis:
+            templates:
+              - templateName: p10-prometheus-canary
+            args:
+              - name: service-name
+                value: {{ $svc.name | quote }}
+              - name: route
+                value: {{ if eq $svc.name "api-gateway" }}"/api/appointments"{{ else if eq $svc.name "appointments-service" }}"/appointments"{{ else }}"/pets/:id"{{ end }}
+              - name: method
+                value: {{ if eq $svc.name "pets-service" }}"GET"{{ else }}"POST"{{ end }}
+              - name: canary-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
+        - setWeight: 50
+        - pause:
+            duration: 30s
+        - analysis:
+            templates:
+              - templateName: p10-prometheus-canary
+            args:
+              - name: service-name
+                value: {{ $svc.name | quote }}
+              - name: route
+                value: {{ if eq $svc.name "api-gateway" }}"/api/appointments"{{ else if eq $svc.name "appointments-service" }}"/appointments"{{ else }}"/pets/:id"{{ end }}
+              - name: method
+                value: {{ if eq $svc.name "pets-service" }}"GET"{{ else }}"POST"{{ end }}
+              - name: canary-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
+        - setWeight: 100
+        - analysis:
+            templates:
+              - templateName: p10-prometheus-canary
+            args:
+              - name: service-name
+                value: {{ $svc.name | quote }}
+              - name: route
+                value: {{ if eq $svc.name "api-gateway" }}"/api/appointments"{{ else if eq $svc.name "appointments-service" }}"/appointments"{{ else }}"/pets/:id"{{ end }}
+              - name: method
+                value: {{ if eq $svc.name "pets-service" }}"GET"{{ else }}"POST"{{ end }}
+              - name: canary-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
+      {{- else }}
       {{- with $.Values.rollouts.steps }}
       steps:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- end }}
   template:
     metadata:
@@ -74,6 +125,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['rollouts-pod-template-hash']
+            {{- end }}
+            {{- if and (eq $svc.name "pets-service") (default "" $svc.faultMode) }}
+            - name: P10_FAULT_MODE
+              value: {{ $svc.faultMode | quote }}
             {{- end }}
             {{- if eq $svc.name "appointments-service" }}
             - name: POSTGRES_PASSWORD
