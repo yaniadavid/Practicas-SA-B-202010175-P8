@@ -34,7 +34,7 @@ services:
     enabled: true
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p10-api-gateway
-      tag: v1.0.2
+      tag: v1.0.3
     replicas: 2
     antiAffinity: true
   owners:
@@ -48,14 +48,14 @@ services:
     enabled: true
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p10-pets-service
-      tag: v1.0.2
+      tag: v1.0.3
     replicas: 2
     antiAffinity: true
   appointments:
     enabled: true
     image:
       repository: ghcr.io/yaniadavid/practicas-sa-b-202010175/p10-appointments-service
-      tag: v1.0.2
+      tag: v1.0.3
     replicas: 2
     antiAffinity: true
     livenessPath: /live
